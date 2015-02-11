@@ -16,8 +16,8 @@
 #define SPRITE_HEIGTH (IMAGE_HEIGTH / 2)
 
 typedef struct {
-	int src_x;
-	int src_y;
+	int x;
+	int y;
 	unsigned int width;
 	unsigned int height;
 } SpriteXY;
@@ -30,6 +30,12 @@ SpriteXY sprite_index[] = {
 	{SPRITE_WIDTH,		SPRITE_HEIGTH,	SPRITE_WIDTH,	SPRITE_HEIGTH},
 	{SPRITE_WIDTH * 2,	SPRITE_HEIGTH,	SPRITE_WIDTH,	SPRITE_HEIGTH}
 };
+
+#define SPR_X (sprite_index[current_sprite].x)
+#define SPR_Y (sprite_index[current_sprite].y)
+#define SPR_WIDTH (sprite_index[current_sprite].width)
+#define SPR_HEIGHT (sprite_index[current_sprite].height)
+
 
 Display *display;
 GC gc;
@@ -108,12 +114,8 @@ int main()
 	/* Check for correctness */
 	assert(multi_img->width = IMAGE_WIDTH);
 	assert(multi_img->height = IMAGE_HEIGTH);
-	
-	/* copy the transparent image into the pixmap */
-	Pixmap multi_pix = XCreatePixmap(display, window_id, multi_clp->width, multi_clp->height, multi_clp->depth);
-	GC multi_gc = XCreateGC(display, multi_pix, 0, NULL);
-	XPutImage(display, multi_pix, multi_gc, multi_clp, 0, 0, 0, 0, multi_clp->width, multi_clp->height);
-	
+	assert(multi_clp->width = IMAGE_WIDTH);
+	assert(multi_clp->height = IMAGE_HEIGTH);
 	
 	/* Put background */
 	XPutImage(display, window_id, gc, background_img, 0, 0, 0, 0,
@@ -123,11 +125,28 @@ int main()
 	{
 		unsigned int x = random() % width;
 		unsigned int y = random() % height;
+		int i;
 		
-		/* put multi transparent image in random places */
-		XSetClipMask(display, gc, multi_pix);
-		XSetClipOrigin(display, gc, x, y);
-		XPutImage(display, window_id, gc, multi_img, 0, 0, x, y, multi_img->width, multi_img->height);
+		/* Multi cleans */
+		for (i=0; i < 25; i++)
+		{
+			int current_sprite = i % 6;
+			
+			/* copy the transparent image into the pixmap */
+			Pixmap multi_pix = XCreatePixmap(display, window_id, SPRITE_WIDTH, SPRITE_HEIGTH, multi_clp->depth);
+			GC multi_gc = XCreateGC(display, multi_pix, 0, NULL);
+			XPutImage(display, multi_pix, multi_gc, multi_clp, SPR_X, SPR_Y, 0, 0, SPR_WIDTH, SPR_HEIGHT);
+			
+			/* put multi transparent image in random places */
+			XSetClipMask(display, gc, multi_pix);
+			XSetClipOrigin(display, gc, x, y);
+			XPutImage(display, window_id, gc, multi_img, SPR_X, SPR_Y, x, y, SPR_WIDTH, SPR_HEIGHT);
+			
+			usleep(1000 * 250);
+			
+			/* Remove this Multi */
+			XPutImage(display, window_id, gc, background_img, x, y, x, y, SPRITE_WIDTH, SPRITE_HEIGTH);
+		}
 		
 		/* once in a while, clear all */
 		if (random() % 500 < 1)
@@ -139,6 +158,5 @@ int main()
 		}
 		
 		usleep(1000);
-		
 	}
 }
