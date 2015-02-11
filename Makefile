@@ -1,5 +1,5 @@
 LDLIBS= -lX11 -lXpm
-#CFLAGS= -march=native -O2 -Wall
+CFLAGS= -march=native -O2 -Wall
 
 multi: multi.o
 
