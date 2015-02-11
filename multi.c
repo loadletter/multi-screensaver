@@ -16,6 +16,7 @@ int width;
 int height;
 int depth;
 XImage *multi_img;
+XImage *multi_clp;
 XImage *background_img;
 
 
@@ -62,7 +63,7 @@ int main()
 	window_id = strtol(xscreen_id, 0, 16);
 	
 	gc = XCreateGC(display, window_id, 0, NULL);
-
+	
 	/* Get window dimension */
 	get_dimensions();	
 
@@ -74,12 +75,18 @@ int main()
 		exit (1);
 	}
 		
-	/* Load multi bitmap from xpm data */
-	if (XpmCreateImageFromData  (display, multi_xpm, &multi_img, NULL, NULL))
+	/* Load multi bitmap and transparency from xpm data */
+	if (XpmCreateImageFromData  (display, multi_xpm, &multi_img, &multi_clp, NULL))
 	{
 		printf ("Error reading image\n");
 		exit (1);
 	}
+	
+	/* copy the transparent image into the pixmap */
+	Pixmap multi_pix = XCreatePixmap(display, window_id, multi_clp->width, multi_clp->height, multi_clp->depth);
+	GC multi_gc = XCreateGC(display, multi_pix, 0, NULL);
+	XPutImage(display, multi_pix, multi_gc, multi_clp, 0, 0, 0, 0, multi_clp->width, multi_clp->height);
+	
 	
 	/* Put background */
 	XPutImage(display, window_id, gc, background_img, 0, 0, 0, 0,
@@ -87,15 +94,18 @@ int main()
 
 	while(1)
 	{
-		/* put multi bitmap in random places */
-		XPutImage(display, window_id, gc, multi_img, 0, 0,
-				random() % width,
-				random() % height,
-				multi_img->width, multi_img->height);
+		unsigned int x = random() % width;
+		unsigned int y = random() % height;
+		
+		/* put multi transparent image in random places */
+		XSetClipMask(display, gc, multi_pix);
+		XSetClipOrigin(display, gc, x, y);
+		XPutImage(display, window_id, gc, multi_img, 0, 0, x, y, multi_img->width, multi_img->height);
 		
 		/* once in a while, clear all */
 		if (random() % 500 < 1)
 		{
+			XSetClipMask(display, gc, None);
 			XClearWindow(display, window_id);
 			XPutImage(display, window_id, gc, background_img, 0, 0, 0, 0,
 				background_img->width, background_img->height);
