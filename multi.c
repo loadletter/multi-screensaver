@@ -52,24 +52,19 @@ int main()
 	printf("Welcome!\n");
 	display = XOpenDisplay(NULL);
 	srand(time(NULL));
-	char *xscreen_id = getenv("XSCREENSAVER_WINDOW");
-	if(xscreen_id)
-	{
-		window_id = strtol(xscreen_id, 0, 16);
-		gc = XCreateGC(display, window_id, 0, NULL);
-	}
-	else
-	{
-		printf("Couldn't find window from $XSCREENSAVER_WINDOW, creating one\n");
-		window_id = RootWindow(display, 0);
-		gc = XCreateGC(display, window_id, 0, NULL);
-		window_id = XCreateSimpleWindow(display, window_id, 0, 0, 840, 640, 0, 0, WhitePixel(display, 0));
-		XMapWindow(display, window_id);
-	}
-	//XSetForeground(display, gc, XWhitePixel(display, 0));
 	
+	char *xscreen_id = getenv("XSCREENSAVER_WINDOW");
+	if(!xscreen_id)
+	{
+		printf("Couldn't find window from $XSCREENSAVER_WINDOW\n");
+		exit(1);
+	}
+	window_id = strtol(xscreen_id, 0, 16);
+	
+	gc = XCreateGC(display, window_id, 0, NULL);
+
 	/* Get window dimension */
-	get_dimensions();
+	get_dimensions();	
 
 	/* Capture background */
 	background_img = XGetImage(display, window_id, 0, 0, width, height, AllPlanes, ZPixmap);
