@@ -56,28 +56,9 @@ void get_dimensions()
 {
 	long dummy_id;
 	int dummy;
-	XGetGeometry(display, window_id, &dummy_id,
-			  &dummy, &dummy, &width, &height, &dummy, &depth);
+	XGetGeometry(display, window_id, &dummy_id, &dummy, &dummy, &width, &height, &dummy, &depth);
 }
 
-void xclear()
-{
-	XSetForeground(display, gc, XBlackPixel(display, 0));
-	XFillRectangle(display, pixmap, gc, 0,0, width, height);
-	XSetForeground(display, gc, XWhitePixel(display, 0));
-}
-
-void xcopy()
-{
-	XCopyArea(display, pixmap, window_id, gc, 0, 0, width, height, 0, 0);
-	XFlush(display);
-}
-
-void color(char *color, XColor *result)
-{
-	XParseColor(display, DefaultColormap(display,0), color, result);
-	XAllocColor(display, DefaultColormap(display,0), result);
-}
 
 int main()
 {
