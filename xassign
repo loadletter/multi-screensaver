@@ -1,0 +1,7 @@
+#!/bin/bash
+echo Select a window
+tmpfile=$(tempfile)
+xwininfo > $tmpfile
+windowid=$(grep -o "Window id: 0x[^ ]*" $tmpfile | grep -o "0x.*")
+rm $tmpfile
+XSCREENSAVER_WINDOW=$windowid $1
