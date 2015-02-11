@@ -14,6 +14,7 @@
 
 #define SPRITE_WIDTH (IMAGE_WIDTH / 3)
 #define SPRITE_HEIGTH (IMAGE_HEIGTH / 2)
+#define SPRITE_NUMBER 6
 
 typedef struct {
 	int x;
@@ -22,17 +23,18 @@ typedef struct {
 	unsigned int height;
 } SpriteXY;
 
-SpriteXY sprite_index[] = {
-	{0,					0,				SPRITE_WIDTH, 	SPRITE_HEIGTH},
-	{SPRITE_WIDTH,		0,				SPRITE_WIDTH,	SPRITE_HEIGTH},
-	{SPRITE_WIDTH * 2,	0,				SPRITE_WIDTH,	SPRITE_HEIGTH},
+SpriteXY sprite_index[SPRITE_NUMBER] = {
 	{0,					SPRITE_HEIGTH,	SPRITE_WIDTH,	SPRITE_HEIGTH},
 	{SPRITE_WIDTH,		SPRITE_HEIGTH,	SPRITE_WIDTH,	SPRITE_HEIGTH},
-	{SPRITE_WIDTH * 2,	SPRITE_HEIGTH,	SPRITE_WIDTH,	SPRITE_HEIGTH}
+	{SPRITE_WIDTH * 2,	SPRITE_HEIGTH,	SPRITE_WIDTH,	SPRITE_HEIGTH},
+
+	{SPRITE_WIDTH * 2,	SPRITE_HEIGTH,	SPRITE_WIDTH,	SPRITE_HEIGTH},
+	{SPRITE_WIDTH,		SPRITE_HEIGTH,	SPRITE_WIDTH,	SPRITE_HEIGTH},
+	{0,					SPRITE_HEIGTH,	SPRITE_WIDTH,	SPRITE_HEIGTH},
 };
 
 #define SPR_X (sprite_index[current_sprite].x)
-#define SPR_Y (sprite_index[current_sprite].y)
+#define SPR_Y (blink_eyes ? 0 : sprite_index[current_sprite].y)
 #define SPR_WIDTH (sprite_index[current_sprite].width)
 #define SPR_HEIGHT (sprite_index[current_sprite].height)
 
@@ -125,12 +127,15 @@ int main()
 	{
 		unsigned int x = random() % width;
 		unsigned int y = random() % height;
+		int blink_eyes = 0;
 		int i;
 		
 		/* Multi cleans */
-		for (i=0; i < 25; i++)
+		for (i=0; i < (SPRITE_NUMBER * 6); i++)
 		{
-			int current_sprite = i % 6;
+			/* Get current sprite, if beginning a new cycle maybe blink her eyes */
+			int current_sprite = i % SPRITE_NUMBER;
+			blink_eyes = (current_sprite == 0 ? (random() % SPRITE_NUMBER == 0) : blink_eyes);
 			
 			/* copy the transparent image into the pixmap */
 			Pixmap multi_pix = XCreatePixmap(display, window_id, SPRITE_WIDTH, SPRITE_HEIGTH, multi_clp->depth);
@@ -142,7 +147,7 @@ int main()
 			XSetClipOrigin(display, gc, x, y);
 			XPutImage(display, window_id, gc, multi_img, SPR_X, SPR_Y, x, y, SPR_WIDTH, SPR_HEIGHT);
 			
-			usleep(1000 * 250);
+			usleep(1000 * 120);
 			
 			/* Remove this Multi */
 			XPutImage(display, window_id, gc, background_img, x, y, x, y, SPRITE_WIDTH, SPRITE_HEIGTH);
@@ -153,8 +158,7 @@ int main()
 		{
 			XSetClipMask(display, gc, None);
 			XClearWindow(display, window_id);
-			XPutImage(display, window_id, gc, background_img, 0, 0, 0, 0,
-				background_img->width, background_img->height);
+			XPutImage(display, window_id, gc, background_img, 0, 0, 0, 0, background_img->width, background_img->height);
 		}
 		
 		usleep(1000);
