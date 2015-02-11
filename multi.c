@@ -2,11 +2,34 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
 
 #include "multi.xpm"
+
+#define IMAGE_WIDTH 240
+#define IMAGE_HEIGTH 192
+
+#define SPRITE_WIDTH (IMAGE_WIDTH / 3)
+#define SPRITE_HEIGTH (IMAGE_HEIGTH / 2)
+
+typedef struct {
+	int src_x;
+	int src_y;
+	unsigned int width;
+	unsigned int height;
+} SpriteXY;
+
+SpriteXY sprite_index[] = {
+	{0,					0,				SPRITE_WIDTH, 	SPRITE_HEIGTH},
+	{SPRITE_WIDTH,		0,				SPRITE_WIDTH,	SPRITE_HEIGTH},
+	{SPRITE_WIDTH * 2,	0,				SPRITE_WIDTH,	SPRITE_HEIGTH},
+	{0,					SPRITE_HEIGTH,	SPRITE_WIDTH,	SPRITE_HEIGTH},
+	{SPRITE_WIDTH,		SPRITE_HEIGTH,	SPRITE_WIDTH,	SPRITE_HEIGTH},
+	{SPRITE_WIDTH * 2,	SPRITE_HEIGTH,	SPRITE_WIDTH,	SPRITE_HEIGTH}
+};
 
 Display *display;
 GC gc;
@@ -81,6 +104,10 @@ int main()
 		printf ("Error reading image\n");
 		exit (1);
 	}
+	
+	/* Check for correctness */
+	assert(multi_img->width = IMAGE_WIDTH);
+	assert(multi_img->height = IMAGE_HEIGTH);
 	
 	/* copy the transparent image into the pixmap */
 	Pixmap multi_pix = XCreatePixmap(display, window_id, multi_clp->width, multi_clp->height, multi_clp->depth);
