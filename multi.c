@@ -89,10 +89,13 @@ int main()
 	assert(multi_clp->width = IMAGE_WIDTH);
 	assert(multi_clp->height = IMAGE_HEIGHT);
 	
-	/* Put background */
-	XPutImage(display, window_id, gc, background_img, 0, 0, 0, 0, background_img->width, background_img->height);
+	/* Create double buffer */
+	Pixmap double_buffer = XCreatePixmap(display, window_id, wa.width, wa.height, wa.depth);
 	
-	/* TODO: use double buffering and add arc drawing */
+	/* Put background */
+	XPutImage(display, double_buffer, gc, background_img, 0, 0, 0, 0, background_img->width, background_img->height);
+	
+	/* TODO: add arc drawing and support for multiple multi */
 
 	while(1)
 	{
@@ -109,27 +112,31 @@ int main()
 			blink_eyes = (current_sprite == 0 ? (random() % SPRITE_NUMBER == 0) : blink_eyes);
 			
 			/* copy the transparent image into the pixmap */
-			Pixmap multi_pix = XCreatePixmap(display, window_id, SPRITE_WIDTH, SPRITE_HEIGHT, multi_clp->depth);
+			Pixmap multi_pix = XCreatePixmap(display, double_buffer, SPRITE_WIDTH, SPRITE_HEIGHT, multi_clp->depth);
 			GC multi_gc = XCreateGC(display, multi_pix, 0, NULL);
 			XPutImage(display, multi_pix, multi_gc, multi_clp, SPR_X, SPR_Y, 0, 0, SPR_WIDTH, SPR_HEIGHT);
 			
-			/* put multi transparent image in random places */
+			/* put multi transparent image into buffer */
 			XSetClipMask(display, gc, multi_pix);
 			XSetClipOrigin(display, gc, x, y);
-			XPutImage(display, window_id, gc, multi_img, SPR_X, SPR_Y, x, y, SPR_WIDTH, SPR_HEIGHT);
+			XPutImage(display, double_buffer, gc, multi_img, SPR_X, SPR_Y, x, y, SPR_WIDTH, SPR_HEIGHT);
+			
+			/* copy from buffer to window */
+			XSetClipMask(display, gc, None);
+			XCopyArea(display, double_buffer, window_id, gc, 0, 0, wa.width, wa.height, 0, 0);
 			
 			usleep(1000 * 120);
 			
 			/* Remove this Multi */
-			XPutImage(display, window_id, gc, background_img, x, y, x, y, SPRITE_WIDTH, SPRITE_HEIGHT);
+			XPutImage(display, double_buffer, gc, background_img, x, y, x, y, SPRITE_WIDTH, SPRITE_HEIGHT);
 		}
 		
 		/* once in a while, clear all */
 		if (random() % 500 < 1)
 		{
 			XSetClipMask(display, gc, None);
-			XClearWindow(display, window_id);
-			XPutImage(display, window_id, gc, background_img, 0, 0, 0, 0, background_img->width, background_img->height);
+			XPutImage(display, double_buffer, gc, background_img, 0, 0, 0, 0, background_img->width, background_img->height);
+			XCopyArea(display, double_buffer, window_id, gc, 0, 0, wa.width, wa.height, 0, 0);
 		}
 		
 		usleep(1000);
