@@ -44,6 +44,31 @@ SpriteXY sprite_index[SPRITE_NUMBER] = {
 #define CIRCLE_Y (y + (SPRITE_HEIGHT - 4) - (circle_size / 2))
 #define CIRCLE_X (x + (15) - (circle_size / 2))
 
+
+typedef struct {
+	unsigned int x;
+	unsigned int y;
+	unsigned int circle_size;
+	int blink_eyes;
+	int i;
+	XImage *img;
+	XImage *clp;
+	XImage *pix;
+	GC gc;
+} MultiState;
+
+typedef struct {
+	unsigned int number;
+	MultiState *multi[10];
+	Display *display;
+	XWindowAttributes wa;
+	GC gc;
+	XImage bg_img;
+	Pixmap double_buf;
+	Pixmap bg_pix;	
+} SaverState;
+
+
 Display *display;
 XWindowAttributes wa;
 GC gc;
@@ -102,7 +127,12 @@ int main()
 	XPutImage(display, background_pix, gc, background_img, 0, 0, 0, 0, background_img->width, background_img->height);
 	XCopyArea(display, background_pix, double_buffer, gc, 0, 0, wa.width, wa.height, 0, 0);
 	
-	/* TODO: add support for multiple Multis and optimize xcopyarea */
+	/* TODO:
+	 * add support for multiple Multis
+	 * optimize xcopyarea
+	 * find out how to set dontClearRoot for xscreensaver
+	 * copy some macros from xscreensaver (screenhack.h, screenhacki.h ) to build as an xsceensaver module
+	 * copy some settings stuff (XrmGetResource from resources.c) */
 
 	while(1)
 	{
