@@ -35,10 +35,14 @@ SpriteXY sprite_index[SPRITE_NUMBER] = {
 	{0,					SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
 };
 
+/* get sprite coordinates, switch to lower sprites if blinking */
 #define SPR_X (sprite_index[current_sprite].x)
 #define SPR_Y (blink_eyes ? 0 : sprite_index[current_sprite].y)
 #define SPR_WIDTH (sprite_index[current_sprite].width)
 #define SPR_HEIGHT (sprite_index[current_sprite].height)
+/* calculate offset and radius */
+#define CIRCLE_Y (y + (SPRITE_HEIGHT - 4) - (circle_size / 2))
+#define CIRCLE_X (x + (15) - (circle_size / 2))
 
 Display *display;
 XWindowAttributes wa;
@@ -69,6 +73,7 @@ int main()
 	XGetWindowAttributes(display, window_id, &wa);
 
 	/* Capture background */
+	/* TODO: maybe DefaultRootWindow(display) instead of window_id */
 	background_img = XGetImage(display, window_id, 0, 0, wa.width, wa.height, AllPlanes, ZPixmap);
 	if (!background_img)
 	{
@@ -91,17 +96,20 @@ int main()
 	
 	/* Create double buffer */
 	Pixmap double_buffer = XCreatePixmap(display, window_id, wa.width, wa.height, wa.depth);
+
+	/* Create pixmap to store background with holes */
+	Pixmap background_pix = XCreatePixmap(display, double_buffer, wa.width, wa.height, wa.depth);
+	XPutImage(display, background_pix, gc, background_img, 0, 0, 0, 0, background_img->width, background_img->height);
+	XCopyArea(display, background_pix, double_buffer, gc, 0, 0, wa.width, wa.height, 0, 0);
 	
-	/* Put background */
-	XPutImage(display, double_buffer, gc, background_img, 0, 0, 0, 0, background_img->width, background_img->height);
-	
-	/* TODO: add arc drawing and support for multiple multi */
+	/* TODO: add support for multiple Multis and optimize xcopyarea */
 
 	while(1)
 	{
 		unsigned int x = random() % wa.width;
 		unsigned int y = random() % wa.height;
 		int blink_eyes = 0;
+		int circle_size = 20;
 		int i;
 		
 		/* Multi cleans */
@@ -110,6 +118,11 @@ int main()
 			/* Get current sprite, if beginning a new cycle maybe blink her eyes */
 			int current_sprite = i % SPRITE_NUMBER;
 			blink_eyes = (current_sprite == 0 ? (random() % SPRITE_NUMBER == 0) : blink_eyes);
+			
+			/* Draw arc */
+			XSetForeground(display, gc, XBlackPixel(display, 0));
+			XFillArc(display, background_pix, gc, CIRCLE_X, CIRCLE_Y, circle_size, circle_size, 0, 360 * 64);
+			circle_size += 2;
 			
 			/* copy the transparent image into the pixmap */
 			Pixmap multi_pix = XCreatePixmap(display, double_buffer, SPRITE_WIDTH, SPRITE_HEIGHT, multi_clp->depth);
@@ -128,15 +141,15 @@ int main()
 			usleep(1000 * 120);
 			
 			/* Remove this Multi */
-			XPutImage(display, double_buffer, gc, background_img, x, y, x, y, SPRITE_WIDTH, SPRITE_HEIGHT);
+			XCopyArea(display, background_pix, double_buffer, gc, 0, 0, wa.width, wa.height, 0, 0);
 		}
 		
 		/* once in a while, clear all */
 		if (random() % 500 < 1)
 		{
 			XSetClipMask(display, gc, None);
-			XPutImage(display, double_buffer, gc, background_img, 0, 0, 0, 0, background_img->width, background_img->height);
-			XCopyArea(display, double_buffer, window_id, gc, 0, 0, wa.width, wa.height, 0, 0);
+			XPutImage(display, background_pix, gc, background_img, 0, 0, 0, 0, background_img->width, background_img->height);
+			XCopyArea(display, background_pix, double_buffer, gc, 0, 0, wa.width, wa.height, 0, 0);
 		}
 		
 		usleep(1000);
