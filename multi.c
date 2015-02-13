@@ -11,6 +11,10 @@
 
 #include "multi.xpm"
 
+#ifdef USE_XSCREENSAVER
+#include "xscreensave.h"
+#endif
+
 #define IMAGE_WIDTH 240
 #define IMAGE_HEIGHT 192
 /* Sprites */
@@ -18,6 +22,7 @@
 #define SPRITE_HEIGHT (IMAGE_HEIGHT / 2)
 #define SPRITE_NUMBER 6
 #define SPRITE_REPEAT 6
+#define MAX_MULTIS 10
 /* Get sprite coordinates, switch to lower sprites if blinking */
 #define SPR_X (sprite_index[current_sprite].x)
 #define SPR_Y (st->multi[m]->blink ? 0 : sprite_index[current_sprite].y)
@@ -47,8 +52,8 @@ typedef struct {
 } MultiState;
 
 typedef struct {
-	unsigned char number;
-	MultiState *multi[10];
+	unsigned int number;
+	MultiState *multi[MAX_MULTIS];
 	Display *display;
 	Window window;
 	XWindowAttributes wa;
@@ -69,7 +74,7 @@ SpriteXY sprite_index[SPRITE_NUMBER] = {
 	{0,					SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
 };
 
-static SaverState *screen_init(unsigned char multi_number)
+static SaverState *screen_init(unsigned int multi_number, char dont_getimage)
 {
 	printf("Welcome!\n");
 	srand(time(NULL));
@@ -92,6 +97,13 @@ static SaverState *screen_init(unsigned char multi_number)
 	}
 	st->window = strtol(xscreen_id, 0, 16);
 	
+	if (!dont_getimage)
+	{
+#ifdef USE_XSCREENSAVER
+	grab_screen_image(xscreen_id);
+#endif
+	}
+
 	st->gc = XCreateGC(st->display, st->window, 0, NULL);
 	
 	/* Set drawing color */
@@ -120,7 +132,7 @@ static SaverState *screen_init(unsigned char multi_number)
 	/* Load multi bitmap and transparency from xpm data */
 	XImage *multi_img;
 	XImage *multi_clp;
-	int i;
+	unsigned int i;
 	if (XpmCreateImageFromData(st->display, multi_xpm, &multi_img, &multi_clp, NULL))
 	{
 		printf ("Error reading image\n");
@@ -150,7 +162,7 @@ static SaverState *screen_init(unsigned char multi_number)
 
 static void run_cycle(SaverState *st)
 {
-	int m;
+	unsigned int m;
 	for (m=0; m<(st->number); m++)
 	{
 		/* Reinitilize if completed a cycle */
@@ -213,12 +225,40 @@ static void screen_revert(SaverState *st)
 
 int main(int argc, char **argv)
 {
-	SaverState *st = screen_init(4);
+	unsigned int multi_number = 1;
+	char reset = 0;
+	char dont_getimage = 0;
+	int c;
+	while ((c = getopt (argc, argv, "drn:")) != -1)
+		switch(c)
+		{
+			case 'r':
+				reset = 1;
+				break;
+			case 'd':
+				dont_getimage = 1;
+				break;
+			case 'n':
+				multi_number = atoi(optarg);
+				multi_number = !(multi_number > 0 && multi_number < MAX_MULTIS) ? 1 : multi_number;
+				break;
+			case '?':
+				if (optopt == 'n')
+					fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+				else
+					fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+				fprintf(stderr, "Usage: %s [-n NUM] [-r]\n", argv[0]);
+				fprintf(stderr, "-n NUM: sets the number of multis, must be between 1 and %i\n", MAX_MULTIS);
+				fprintf(stderr, "-r: randomly restore the screen so multi has more to work\n");
+#ifdef USE_XSCREENSAVER
+				fprintf(stderr, "-d: dont invoke xscreensaver-getimage for the background\n");
+#endif
+				exit(1);
+			default:
+				abort();
+		}
 	
-	/* TODO:
-	 * find out how to set dontClearRoot for xscreensaver
-	 * copy some macros from xscreensaver (screenhack.h, screenhacki.h ) to build as an xsceensaver module
-	 * copy some settings stuff (XrmGetResource from resources.c) */
+	SaverState *st = screen_init(multi_number, dont_getimage);
 
 	while(1)
 	{
@@ -229,7 +269,7 @@ int main(int argc, char **argv)
 		usleep(1000 * 120);
 		
 		/* Once in a while, clear all */
-		if (random() % 5000 < 1)
+		if (reset && random() % 5000 < 1)
 		{
 			screen_revert(st);
 		}

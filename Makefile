@@ -1,10 +1,9 @@
-LDLIBS= -lX11 -lXpm -lXt
-CFLAGS+= -Wall -Wextra 
+LDLIBS= -lX11 -lXpm
+CFLAGS+= -Wall -Wextra -DUSE_XSCREENSAVER
 
-multi: multi.o
+multi: multi.o xscreensave.o
 
 all: multi
 
 clean:
-	-rm -f multi multi.o
-	
+	-rm -f multi multi.o xscreensave.o	
