@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=HMX12 Multi
+Comment=Multi cleans the screen
+Exec=/usr/libexec/mate-screensaver/hmx12multi -d -n 5
+TryExec=/usr/libexec/mate-screensaver/hmx12multi
+StartupNotify=false
+Terminal=false
+Type=Application
+Categories=Screensaver;
