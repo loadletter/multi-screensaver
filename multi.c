@@ -13,29 +13,11 @@
 
 #define IMAGE_WIDTH 240
 #define IMAGE_HEIGHT 192
-
+/* Sprites */
 #define SPRITE_WIDTH (IMAGE_WIDTH / 3)
 #define SPRITE_HEIGHT (IMAGE_HEIGHT / 2)
 #define SPRITE_NUMBER 6
 #define SPRITE_REPEAT 6
-
-typedef struct {
-	int x;
-	int y;
-	unsigned int width;
-	unsigned int height;
-} SpriteXY;
-
-SpriteXY sprite_index[SPRITE_NUMBER] = {
-	{0,					SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
-	{SPRITE_WIDTH,		SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
-	{SPRITE_WIDTH * 2,	SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
-
-	{SPRITE_WIDTH * 2,	SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
-	{SPRITE_WIDTH,		SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
-	{0,					SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
-};
-
 /* Get sprite coordinates, switch to lower sprites if blinking */
 #define SPR_X (sprite_index[current_sprite].x)
 #define SPR_Y (st->multi[m]->blink ? 0 : sprite_index[current_sprite].y)
@@ -45,6 +27,12 @@ SpriteXY sprite_index[SPRITE_NUMBER] = {
 #define CIRCLE_Y ((st->multi[m]->y) + (SPRITE_HEIGHT - 4) - (st->multi[m]->circle_size / 2))
 #define CIRCLE_X ((st->multi[m]->x) + (15) - (st->multi[m]->circle_size / 2))
 
+typedef struct {
+	int x;
+	int y;
+	unsigned int width;
+	unsigned int height;
+} SpriteXY;
 
 typedef struct {
 	unsigned int x;
@@ -70,6 +58,16 @@ typedef struct {
 	Pixmap bg_pix;	
 } SaverState;
 
+/* Sprite table */
+SpriteXY sprite_index[SPRITE_NUMBER] = {
+	{0,					SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
+	{SPRITE_WIDTH,		SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
+	{SPRITE_WIDTH * 2,	SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
+
+	{SPRITE_WIDTH * 2,	SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
+	{SPRITE_WIDTH,		SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
+	{0,					SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
+};
 
 static SaverState *screen_init(unsigned char multi_number)
 {
@@ -213,7 +211,7 @@ static void screen_revert(SaverState *st)
 	XCopyArea(st->display, st->bg_pix, st->double_buf, st->gc, 0, 0, st->wa.width, st->wa.height, 0, 0);
 }
 
-int main()
+int main(int argc, char **argv)
 {
 	SaverState *st = screen_init(4);
 	
