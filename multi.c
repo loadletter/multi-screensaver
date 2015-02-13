@@ -33,8 +33,8 @@
 #define CIRCLE_X ((st->multi[m]->x) + (15) - (st->multi[m]->circle_size / 2))
 
 typedef struct {
-	int x;
-	int y;
+	unsigned int x;
+	unsigned int y;
 	unsigned int width;
 	unsigned int height;
 } SpriteXY;
@@ -113,12 +113,11 @@ static SaverState *screen_init(unsigned int multi_number, char dont_getimage)
 	XGetWindowAttributes(st->display, st->window, &(st->wa));
 
 	/* Capture background */
-	/* TODO: maybe DefaultRootWindow(display) instead of window_id */
 	st->bg_img = XGetImage(st->display, st->window, 0, 0, st->wa.width, st->wa.height, AllPlanes, ZPixmap);
 	if (!st->bg_img)
 	{
-		printf ("Error reading background\n");
-		exit (1);
+		printf("Error reading background\n");
+		exit(1);
 	}
 
 	/* Create double buffer */
@@ -135,8 +134,8 @@ static SaverState *screen_init(unsigned int multi_number, char dont_getimage)
 	unsigned int i;
 	if (XpmCreateImageFromData(st->display, multi_xpm, &multi_img, &multi_clp, NULL))
 	{
-		printf ("Error reading image\n");
-		exit (1);
+		printf("Error reading image\n");
+		exit(1);
 	}
 	for (i=0; i<multi_number; i++)
 	{
@@ -218,6 +217,7 @@ static void run_cycle(SaverState *st)
 
 static void screen_revert(SaverState *st)
 {
+	/* Overwrite background with original background */
 	XSetClipMask(st->display, st->gc, None);
 	XPutImage(st->display, st->bg_pix, st->gc, st->bg_img, 0, 0, 0, 0, st->bg_img->width, st->bg_img->height);
 	XCopyArea(st->display, st->bg_pix, st->double_buf, st->gc, 0, 0, st->wa.width, st->wa.height, 0, 0);
@@ -240,7 +240,7 @@ int main(int argc, char **argv)
 				break;
 			case 'n':
 				multi_number = atoi(optarg);
-				multi_number = !(multi_number > 0 && multi_number < MAX_MULTIS) ? 1 : multi_number;
+				multi_number = !(multi_number > 0 && multi_number <= MAX_MULTIS) ? 1 : multi_number;
 				break;
 			case '?':
 				if (optopt == 'n')

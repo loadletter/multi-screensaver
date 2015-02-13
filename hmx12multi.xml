@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<screensaver name="hmx12multi" _label="HMX-12 Multi">
+  <number id="number" type="slider" arg="-n %"
+          _label="Number of Multis" _low-label="1" _high-label="10"
+          low="1" high="10" default="1"/>
+  <boolean id="clear" _label="Randomly reset desktop" arg-set="-r"/>
+  <xscreensaver-updater />
+
+  <_description>
+Multi mops a screen spot until it becomes black, then switches to another place.
+
+X11 port by loadletter (https://github.com/loadletter/multi-screensaver)
+
+Based on:
+Multi ScreenSaver for Win32 Trial Version
+Copyright (C) 1997 ELEMENTAL SOFT, SETSURA, REDKING
+  </_description>
+</screensaver>
