@@ -7,9 +7,10 @@ X11 Port of the [To Heart Multi screensaver from ELEMENTAL SOFT](http://a.pomf.s
 #### Requirements
  - libx11-dev
  - libxpm-dev
- Optional
+
+#####Optional
  - xscreensaver (MATE/KDE/Gnome-screensaver will probably run it fine, but on a black background you will only see multi)
- - xwininfo from the x11-utils package(See standalone usage below)
+ - xwininfo from the x11-utils package (See standalone usage below)
  
 #### Building
  Run ```make```
