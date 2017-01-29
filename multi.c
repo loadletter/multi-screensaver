@@ -24,20 +24,13 @@
 #define SPRITE_REPEAT 6
 #define MAX_MULTIS 10
 /* Get sprite coordinates, switch to lower sprites if blinking */
-#define SPR_X (sprite_index[current_sprite].x)
-#define SPR_Y ((st->multi[m]->blink ? 0 : sprite_index[current_sprite].y) + (st->multi[m]->reverse ? (SPRITE_HEIGHT * 2) : 0))
-#define SPR_WIDTH (sprite_index[current_sprite].width)
-#define SPR_HEIGHT (sprite_index[current_sprite].height)
+#define SPR_X (ani_seq[current_sprite])
+#define SPR_Y ((st->multi[m]->blink ? 0 : SPRITE_HEIGHT) + (st->multi[m]->reverse ? (SPRITE_HEIGHT * 2) : 0))
+#define SPR_WIDTH (SPRITE_WIDTH)
+#define SPR_HEIGHT (SPRITE_HEIGHT)
 /* Calculate offset and radius */
 #define CIRCLE_Y ((st->multi[m]->y) + (SPRITE_HEIGHT - 4) - (st->multi[m]->circle_size / 2))
 #define CIRCLE_X ((st->multi[m]->x) + (st->multi[m]->reverse ? (SPRITE_WIDTH - 15) : 15) - (st->multi[m]->circle_size / 2))
-
-typedef struct {
-	unsigned int x;
-	unsigned int y;
-	unsigned int width;
-	unsigned int height;
-} SpriteXY;
 
 typedef struct {
 	unsigned int x;
@@ -64,16 +57,8 @@ typedef struct {
 	Pixmap bg_pix;	
 } SaverState;
 
-/* Sprite table */
-SpriteXY sprite_index[SPRITE_NUMBER] = {
-	{0,					SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
-	{SPRITE_WIDTH,		SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
-	{SPRITE_WIDTH * 2,	SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
-
-	{SPRITE_WIDTH * 2,	SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
-	{SPRITE_WIDTH,		SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
-	{0,					SPRITE_HEIGHT,	SPRITE_WIDTH,	SPRITE_HEIGHT},
-};
+/* Animation sequence */
+int ani_seq[SPRITE_NUMBER] = {0, SPRITE_WIDTH, SPRITE_WIDTH * 2, SPRITE_WIDTH * 2, SPRITE_WIDTH, 0};
 
 static SaverState *screen_init(unsigned int multi_number, char dont_getimage)
 {
