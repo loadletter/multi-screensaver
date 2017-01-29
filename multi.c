@@ -21,8 +21,8 @@
 #define SPRITE_WIDTH (IMAGE_WIDTH / 3)
 #define SPRITE_HEIGHT (IMAGE_HEIGHT / 4)
 #define SPRITE_NUMBER 6
-#define SPRITE_REPEAT 6
-#define MAX_MULTIS 10
+#define SPRITE_REPEAT 10
+#define MAX_MULTI 12
 /* Get sprite coordinates, switch to lower sprites if blinking */
 #define SPR_X (ani_seq[current_sprite])
 #define SPR_Y ((st->multi[m]->blink ? 0 : SPRITE_HEIGHT) + (st->multi[m]->reverse ? (SPRITE_HEIGHT * 2) : 0))
@@ -47,7 +47,7 @@ typedef struct {
 
 typedef struct {
 	unsigned int number;
-	MultiState *multi[MAX_MULTIS];
+	MultiState *multi[MAX_MULTI];
 	Display *display;
 	Window window;
 	XWindowAttributes wa;
@@ -153,7 +153,7 @@ static void run_cycle(SaverState *st)
 		/* Reinitilize if completed a cycle */
 		if (st->multi[m]->i >= (SPRITE_NUMBER * SPRITE_REPEAT) || st->multi[m]->circle_size == 0)
 		{
-			/* If there are more than one Multis start them at random so that they behave differently
+			/* If there are more than one Multi start them at random so that they behave differently
 			 * (minus the first which is privileged) */
 			if (st->number > 1 && st->multi[m]->circle_size == 0 && m != 0 && (random() % (SPRITE_REPEAT * 2) != 0))
 				continue;
@@ -176,7 +176,7 @@ static void run_cycle(SaverState *st)
 			continue;
 		/* Draw arc */
 		XFillArc(st->display, st->bg_pix, st->gc, CIRCLE_X, CIRCLE_Y, st->multi[m]->circle_size, st->multi[m]->circle_size, 0, 360 * 64);
-		st->multi[m]->circle_size += 2;
+		st->multi[m]->circle_size += 4;
 	}
 	
 	for (m=0; m<(st->number); m++)
@@ -191,7 +191,7 @@ static void run_cycle(SaverState *st)
 		XSetClipMask(st->display, st->gc, st->multi[m]->pix);
 		XSetClipOrigin(st->display, st->gc, st->multi[m]->x, st->multi[m]->y);
 		XPutImage(st->display, st->double_buf, st->gc, st->multi[m]->img, SPR_X, SPR_Y, st->multi[m]->x, st->multi[m]->y, SPR_WIDTH, SPR_HEIGHT);
-		st->multi[m]->i += 1;
+		st->multi[m]->i += 2;
 	}
 	
 	/* Copy from buffer to window */
@@ -227,7 +227,7 @@ int main(int argc, char **argv)
 				break;
 			case 'n':
 				multi_number = atoi(optarg);
-				multi_number = !(multi_number > 0 && multi_number <= MAX_MULTIS) ? 1 : multi_number;
+				multi_number = !(multi_number > 0 && multi_number <= MAX_MULTI) ? 1 : multi_number;
 				break;
 			case '?':
 				if (optopt == 'n')
@@ -235,7 +235,7 @@ int main(int argc, char **argv)
 				else
 					fprintf(stderr, "Unknown option `-%c'.\n", optopt);
 				fprintf(stderr, "Usage: %s [-n NUM] [-r]\n", argv[0]);
-				fprintf(stderr, "-n NUM: sets the number of multis, must be between 1 and %i\n", MAX_MULTIS);
+				fprintf(stderr, "-n NUM: sets the number of multi, must be between 1 and %i\n", MAX_MULTI);
 				fprintf(stderr, "-r: randomly restore the screen so multi has more to work\n");
 #ifdef USE_XSCREENSAVER
 				fprintf(stderr, "-d: dont invoke xscreensaver-getimage for the background\n");
@@ -249,11 +249,11 @@ int main(int argc, char **argv)
 
 	while(1)
 	{
-		/* Multi cleans */
+		/* Multi mops */
 		run_cycle(st);
 		
 		/* Sleep */
-		usleep(1000 * 120);
+		usleep(1000 * 130);
 		
 		/* Once in a while, clear all */
 		if (reset && random() % 5000 < 1)
