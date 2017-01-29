@@ -9,7 +9,7 @@ X11 Port of the [To Heart Multi screensaver from ELEMENTAL SOFT](http://a.pomf.s
  - libxpm-dev
 
 #####Optional
- - xscreensaver (MATE/KDE/Gnome-screensaver will probably run it fine, but on a black background you will only see multi)
+ - xscreensaver (MATE/KDE/Gnome-screensaver will probably run it fine, but the background will be black)
  - xwininfo from the x11-utils package (See standalone usage below)
  
 #### Building
@@ -21,14 +21,13 @@ X11 Port of the [To Heart Multi screensaver from ELEMENTAL SOFT](http://a.pomf.s
 
 #### Installation on a system with xscreensaver (XFCE4, lxde, ...)
  - Copy the executable "multi" to somewhere in you $PATH, ie: ```sudo cp multi /usr/local/bin/hmx12multi```
- - Overwrite/create the configuration file with ```echo 'programs: hmx12multi'~/.xscreensaver.conf```
- - To have nice menu settings also copy the .xml file ```cp hmx12multi.xml /usr/share/xscreensaver/config/```
+ - To have nice menu settings also copy the .xml file ```sudo cp hmx12multi.xml /usr/share/xscreensaver/config/```
  - Run the xscreensaver settings aka ```xscreensaver-demo```
  - The screensaver should be in the list
 
 #### Installation on a system with mate-screensaver (MATE Desktop)
  - Copy the executable "multi" to the screesaver dir ```sudo cp multi /usr/libexec/mate-screensaver/hmx12multi```
- - Edit the command line args at the Exec= line in hmx12multi.desktop to change the number of multis
+ - Edit the command line args at the Exec= line in hmx12multi.desktop to change the number of multi
  - Copy the .desktop file ```sudo cp hmx12multi.desktop /usr/share/applications/screensavers/```
  - Run the screensaver settings
  - The screensaver should be in the list (background will be black)
@@ -39,4 +38,4 @@ X11 Port of the [To Heart Multi screensaver from ELEMENTAL SOFT](http://a.pomf.s
 #### License
 WTFPL License for everything minus:
  - xscreensave.c: see file comments
- - multi.xpm: based on sprites extracted from the windows binay, "Copyright (C) 1997 ELEMENTAL SOFT, SETSURA, REDKING", that's like 18 years old.
+ - multi.xpm: based on sprites extracted from the windows binay, "Copyright (C) 1997 ELEMENTAL SOFT, SETSURA, REDKING"
