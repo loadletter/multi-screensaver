@@ -16,21 +16,21 @@
 #endif
 
 #define IMAGE_WIDTH 240
-#define IMAGE_HEIGHT 192
+#define IMAGE_HEIGHT 384
 /* Sprites */
 #define SPRITE_WIDTH (IMAGE_WIDTH / 3)
-#define SPRITE_HEIGHT (IMAGE_HEIGHT / 2)
+#define SPRITE_HEIGHT (IMAGE_HEIGHT / 4)
 #define SPRITE_NUMBER 6
 #define SPRITE_REPEAT 6
 #define MAX_MULTIS 10
 /* Get sprite coordinates, switch to lower sprites if blinking */
 #define SPR_X (sprite_index[current_sprite].x)
-#define SPR_Y (st->multi[m]->blink ? 0 : sprite_index[current_sprite].y)
+#define SPR_Y ((st->multi[m]->blink ? 0 : sprite_index[current_sprite].y) + (st->multi[m]->reverse ? (SPRITE_HEIGHT * 2) : 0))
 #define SPR_WIDTH (sprite_index[current_sprite].width)
 #define SPR_HEIGHT (sprite_index[current_sprite].height)
 /* Calculate offset and radius */
 #define CIRCLE_Y ((st->multi[m]->y) + (SPRITE_HEIGHT - 4) - (st->multi[m]->circle_size / 2))
-#define CIRCLE_X ((st->multi[m]->x) + (15) - (st->multi[m]->circle_size / 2))
+#define CIRCLE_X ((st->multi[m]->x) + (st->multi[m]->reverse ? (SPRITE_WIDTH - 15) : 15) - (st->multi[m]->circle_size / 2))
 
 typedef struct {
 	unsigned int x;
@@ -44,6 +44,7 @@ typedef struct {
 	unsigned int y;
 	unsigned int circle_size;
 	int blink;
+	int reverse;
 	int i;
 	XImage *img;
 	XImage *clp;
@@ -77,7 +78,7 @@ SpriteXY sprite_index[SPRITE_NUMBER] = {
 static SaverState *screen_init(unsigned int multi_number, char dont_getimage)
 {
 	printf("Welcome!\n");
-	srand(time(NULL));
+	srandom(time(NULL));
 	
 	SaverState *st = malloc(sizeof(SaverState));
 	if(!st)
@@ -175,6 +176,7 @@ static void run_cycle(SaverState *st)
 			st->multi[m]->x = random() % st->wa.width;
 			st->multi[m]->y = random() % st->wa.height;
 			st->multi[m]->blink = 0;
+			st->multi[m]->reverse = (random() % 2 == 0) ? (random() % 2 == 0) : st->multi[m]->reverse;
 			st->multi[m]->circle_size = 20;
 		}
 		
